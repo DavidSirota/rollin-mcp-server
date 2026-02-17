@@ -14,13 +14,21 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "mcp-server",
     "accessibility",
     "wheelchair",
     "restaurants",
     "rollin",
     "api",
     "claude",
-    "ai"
+    "ai",
+    "llm",
+    "cursor",
+    "vscode",
+    "copilot",
+    "anthropic",
+    "chatbot",
+    "open-protocol"
   ],
   "author": "Stackline Studio <projects@stacklinestudio.com>",
   "license": "MIT",
