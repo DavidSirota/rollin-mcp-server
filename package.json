@@ -1,0 +1,48 @@
+{
+  "name": "rollin-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for the ROLLIN Accessibility API — wheelchair accessibility data for 56,000+ US locations",
+  "main": "dist/index.js",
+  "bin": {
+    "rollin-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "accessibility",
+    "wheelchair",
+    "restaurants",
+    "rollin",
+    "api",
+    "claude",
+    "ai"
+  ],
+  "author": "Stackline Studio <projects@stacklinestudio.com>",
+  "license": "MIT",
+  "homepage": "https://joinrollin.com/developers.html",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidSirota/rollin-mcp-server"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^20.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
