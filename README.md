@@ -7,7 +7,7 @@
 <h3 align="center">ROLLIN MCP Server</h3>
 
 <p align="center">
-  Wheelchair accessibility data for 56,000+ locations — delivered through the Model Context Protocol.
+  Wheelchair accessibility data for 80,000+ locations — delivered through the Model Context Protocol.
 </p>
 
 <p align="center">
