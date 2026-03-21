@@ -7,7 +7,7 @@
 <h3 align="center">ROLLIN MCP Server</h3>
 
 <p align="center">
-  Wheelchair accessibility data for 80,000+ locations — delivered through the Model Context Protocol.
+  Wheelchair accessibility data for 88,000+ locations — delivered through the Model Context Protocol.
 </p>
 
 <p align="center">
@@ -21,6 +21,8 @@
 ---
 
 **The only wheelchair accessibility data source available through MCP.** Search restaurants, cafes, and bars. Get real 0–100 accessibility scores. Submit corrections through natural conversation. One protocol — every platform.
+
+**v1.1.0** — Now includes `lighting` parameter for filtering by ambient lighting level, and `environment` object in response data with lighting details.
 
 > Nobody should have to call ahead to ask if they can get in the door.
 > ROLLIN puts accessibility data where it actually gets used.
@@ -130,8 +132,8 @@ Pipe into any MCP-compatible process.
 
 | Tool | What It Does |
 |------|-------------|
-| `search_locations` | Find accessible restaurants near any US location. Filter by cuisine, minimum score, accessibility features. |
-| `get_location_details` | Full accessibility breakdown — score, 6 tracked features, verification status, score components. |
+| `search_locations` | Find accessible restaurants near any US location. Filter by cuisine, minimum score, accessibility features, and ambient lighting (`bright`, `moderate`, `dim`). |
+| `get_location_details` | Full accessibility breakdown — score, 6 tracked features, `environment` object (lighting data), verification status, score components. |
 | `list_regions` | All coverage areas with location counts. Great for "where do you cover?" queries. |
 | `submit_feedback` | Submit corrections through conversation. *"That place has a ramp now."* |
 | `check_health` | Verify the API is up before making requests. |
@@ -147,7 +149,7 @@ Once configured, just ask naturally:
 
 ## Coverage
 
-**6 US states &middot; 22 regions &middot; 56,000+ scored locations**
+**13 US states &middot; 45 regions &middot; 88,000+ scored locations**
 
 | State | Regions |
 |-------|---------|
@@ -155,8 +157,14 @@ Once configured, just ask naturally:
 | California | LA Metro, SF Bay Area, San Diego, Sacramento, Central Coast, Inland Empire |
 | Florida | Miami, Orlando, Tampa Bay, Jacksonville, Southwest FL |
 | Massachusetts | Boston Metro, Western MA |
+| Illinois | Northern IL, West-Central IL, Central IL, Southern IL |
+| Colorado | Northeast CO, Northwest CO, Southeast CO, Southwest CO |
+| Texas | DFW, Houston, Austin, San Antonio, El Paso |
+| Ohio | Cleveland, Cincinnati, Columbus, Northwest OH |
+| Idaho | Northern ID, Boise Metro |
 | New Jersey | Statewide |
 | Pennsylvania | Statewide |
+| Washington DC | DC Metro |
 
 ## Pricing
 
