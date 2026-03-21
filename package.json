@@ -1,7 +1,7 @@
 {
   "name": "rollin-mcp-server",
-  "version": "1.0.1",
-  "description": "MCP server for the ROLLIN Accessibility API — wheelchair accessibility data for 70,000+ US locations",
+  "version": "1.1.0",
+  "description": "MCP server for the ROLLIN Accessibility API — wheelchair accessibility data for 88,000+ US locations",
   "main": "dist/index.js",
   "bin": {
     "rollin-mcp-server": "dist/index.js"

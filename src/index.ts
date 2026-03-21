@@ -95,6 +95,8 @@ server.registerTool(
         .describe("Comma-separated feature filter: wheelchair_entry, accessible_restroom, level_entry, parking, elevator, wide_aisles"),
       limit: z.number().min(1).max(50).default(10).optional()
         .describe("Number of results (default 10, max 50)"),
+      lighting: z.enum(["bright", "moderate", "dim"]).optional()
+        .describe("Filter by ambient lighting level: bright, moderate, or dim"),
     },
   },
   async (params) => {
@@ -107,6 +109,7 @@ server.registerTool(
       if (params.min_score) queryParams.min_score = String(params.min_score);
       if (params.features) queryParams.features = params.features;
       if (params.limit) queryParams.limit = String(params.limit);
+      if (params.lighting) queryParams.lighting = params.lighting;
 
       const data = await apiGet("/locations", queryParams);
       return textResult(data);
