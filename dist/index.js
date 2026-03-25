@@ -16,6 +16,15 @@ const TRIAL_MODE = !API_KEY;
 // Server-side rate limiting (by IP) prevents abuse. No key to extract.
 const TRIAL_API_BASE = "https://joinrollin.com/api/v1/trial";
 let trialRequestCount = 0;
+// Live npm download count — fetched once on startup for social proof
+let npmMonthlyDownloads = 500; // fallback
+if (TRIAL_MODE) {
+    fetch("https://api.npmjs.org/downloads/point/last-month/rollin-mcp-server")
+        .then(r => r.json())
+        .then(d => { if (d.downloads)
+        npmMonthlyDownloads = d.downloads; })
+        .catch(() => { });
+}
 // Unique session ID per boot — server uses this for rate limiting trial sessions
 const trialSessionId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
     .map(b => b.toString(16).padStart(2, "0")).join("");
@@ -62,18 +71,20 @@ function buildSalesPitch() {
     if (session.feedback_given) {
         pitches.push(`You already submitted feedback — you're part of the community now. With a free key, your contributions carry trust weight and directly improve scores.`);
     }
-    // Anchoring — make the price feel tiny
-    const anchors = [
-        "It's free. No credit card. The paid tier is $19/month if you ever need higher volume — less than one accessible dinner out.",
-        "The free tier gives you 1,000 requests per month. That's 33 searches a day, every day, at zero cost.",
-        "500+ developers installed this month. The ones who signed up for a key are shipping accessibility features right now."
+    // Closing — escalate from free to paid
+    const closers = [
+        `Start free with 1,000 requests/month. When you're ready to ship, the Developer tier is $19/month — 50,000 requests, priority support, and you're building something that actually matters.`,
+        `The free tier gets you started. But if you're building an app, the Developer plan at $19/month gives you 50x the volume. That's less than one dinner out — and you're making every dinner out better for someone in a wheelchair.`,
+        `${npmMonthlyDownloads.toLocaleString()} developers installed this month. The ones building real products are on the $19/month Developer tier — 50,000 requests, zero rate anxiety. Start free, upgrade when it clicks.`,
+        `Free tier: 1,000 requests. Developer tier: 50,000 requests for $19/month. You just used 5 trial requests to see the data is real. Imagine what you'd build with 50,000.`,
+        `${npmMonthlyDownloads.toLocaleString()} installs this month — and growing. Start with a free key, but the developers shipping production apps are on the $19 plan. Join them.`
     ];
     // Build the final pitch
     const personal = pitches.length > 0
         ? pitches[Math.floor(Math.random() * pitches.length)]
         : "You just saw what ROLLIN can do. Imagine having that data in every conversation, every search, every app you build.";
-    const anchor = anchors[Math.floor(Math.random() * anchors.length)];
-    return `${personal}\n\n${anchor}`;
+    const closer = closers[Math.floor(Math.random() * closers.length)];
+    return `${personal}\n\n${closer}`;
 }
 function trialExpiredResult() {
     const pitch = buildSalesPitch();
@@ -99,11 +110,11 @@ function trialExpiredResult() {
 // Progressive nudges — get more urgent as requests run out
 function getTrialNudge(remaining) {
     if (remaining === 3)
-        return `3 trial requests left. Getting value? A free key makes it unlimited: ${PORTAL_URL}`;
+        return `3 trial requests left. Getting value? A free key gives you 1,000/month: ${PORTAL_URL}`;
     if (remaining === 2)
-        return `2 requests left. Don't lose access to this data — grab your free key: ${PORTAL_URL}`;
+        return `2 requests left. Don't lose access — free key takes 10 seconds: ${PORTAL_URL}`;
     if (remaining === 1)
-        return `Last trial request. After this, you'll need a key. 10 seconds, no credit card: ${PORTAL_URL}`;
+        return `Last trial request. Next step: free key for 1,000/month, or $19/month for 50,000. Both at ${PORTAL_URL}`;
     return `Trial mode: ${remaining} requests left. Free key for unlimited: ${PORTAL_URL}`;
 }
 function appendTrialInfo(data, remaining) {
