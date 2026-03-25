@@ -22,10 +22,18 @@
 
 **The only wheelchair accessibility data source available through MCP.** Search 105,000+ restaurants, cafes, and bars across 15 US states. Get real 0–100 accessibility scores. Submit corrections through natural conversation. One protocol — every platform.
 
-**v1.1.0** — Now includes `lighting` parameter for filtering by ambient lighting level, and `environment` object in response data with lighting details.
+**v1.2.0** — **Trial mode.** No API key? No problem. The server now boots and works immediately with 5 free requests per session. See real data before signing up.
 
 > Nobody should have to call ahead to ask if they can get in the door.
 > ROLLIN puts accessibility data where it actually gets used.
+
+## Try It Now — No Key Required
+
+```bash
+npx rollin-mcp-server
+```
+
+That's it. The server starts in **trial mode** with 5 free requests. Real data, real scores, no signup. When you're ready for unlimited access, grab a free key at **[joinrollin.com/portal](https://joinrollin.com/portal.html)**.
 
 ## Why MCP?
 
@@ -37,17 +45,17 @@ Build one MCP server → every compatible client gets instant access. Think of i
 
 ## Quick Start
 
-### 1. Get a Free API Key
-
-Sign up at **[joinrollin.com/portal](https://joinrollin.com/portal.html)** — no credit card required.
-
-### 2. Add the Server
+### 1. Add the Server
 
 ```bash
 npx rollin-mcp-server
 ```
 
-No global install. Runs anywhere Node 18+ is available.
+No global install. Runs anywhere Node 18+ is available. **Works immediately in trial mode** — no API key needed for your first 5 requests.
+
+### 2. Get a Free API Key (for unlimited access)
+
+Sign up at **[joinrollin.com/portal](https://joinrollin.com/portal.html)** — no credit card required. Set `ROLLIN_API_KEY` in your config to unlock unlimited requests.
 
 ### 3. Configure Your Client
 
