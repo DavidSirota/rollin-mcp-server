@@ -1,6 +1,6 @@
 {
   "name": "rollin-mcp-server",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "MCP server for the ROLLIN Accessibility API — wheelchair accessibility data for 105,000+ US locations across 15 states",
   "main": "dist/index.js",
   "bin": {
