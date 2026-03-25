@@ -1,0 +1,341 @@
+#!/usr/bin/env node
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
+const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
+const zod_1 = require("zod");
+const API_BASE = "https://joinrollin.com/api/v1";
+const VERSION = "1.2.0";
+const TRIAL_LIMIT = 5;
+const PORTAL_URL = "https://joinrollin.com/portal";
+// --- Trial Mode ---
+const API_KEY = process.env.ROLLIN_API_KEY;
+const TRIAL_MODE = !API_KEY;
+// Trial mode uses a dedicated endpoint that doesn't require auth.
+// No hardcoded keys — trial requests go through a rate-limited public path.
+// Server-side rate limiting (by IP) prevents abuse. No key to extract.
+const TRIAL_API_BASE = "https://joinrollin.com/api/v1/trial";
+let trialRequestCount = 0;
+// Unique session ID per boot — server uses this for rate limiting trial sessions
+const trialSessionId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map(b => b.toString(16).padStart(2, "0")).join("");
+function getActiveKey() {
+    return API_KEY || "";
+}
+function checkTrialLimit() {
+    if (!TRIAL_MODE)
+        return { allowed: true, remaining: Infinity };
+    if (trialRequestCount >= TRIAL_LIMIT)
+        return { allowed: false, remaining: 0 };
+    return { allowed: true, remaining: TRIAL_LIMIT - trialRequestCount };
+}
+function consumeTrialRequest() {
+    if (TRIAL_MODE)
+        trialRequestCount++;
+}
+function trialExpiredResult() {
+    return {
+        content: [{
+                type: "text",
+                text: JSON.stringify({
+                    trial_expired: true,
+                    message: "You've used all 5 trial requests this session. Get your free API key for unlimited access — no credit card, takes 10 seconds.",
+                    url: PORTAL_URL,
+                    hint: "Set ROLLIN_API_KEY in your MCP config, then restart the server."
+                }, null, 2)
+            }],
+    };
+}
+function appendTrialInfo(data, remaining) {
+    if (!TRIAL_MODE)
+        return data;
+    const obj = typeof data === "object" && data !== null
+        ? { ...data }
+        : { data };
+    obj._trial = {
+        mode: true,
+        requests_remaining: remaining,
+        message: `Trial mode: ${remaining} requests left. Get your free key at ${PORTAL_URL}`
+    };
+    return obj;
+}
+// --- Helpers ---
+async function apiGet(path, params) {
+    const base = TRIAL_MODE ? TRIAL_API_BASE : API_BASE;
+    const url = new URL(`${base}${path}`);
+    if (params) {
+        Object.entries(params).forEach(([k, v]) => {
+            if (v !== undefined && v !== "")
+                url.searchParams.set(k, v);
+        });
+    }
+    const headers = {};
+    if (!TRIAL_MODE && API_KEY) {
+        headers["X-API-Key"] = API_KEY;
+    }
+    // Trial requests include a fingerprint so server can rate-limit per-instance
+    if (TRIAL_MODE) {
+        headers["X-Trial-Session"] = trialSessionId;
+    }
+    const res = await fetch(url.toString(), { headers });
+    if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`API ${res.status}: ${body}`);
+    }
+    return res.json();
+}
+async function apiPost(path, body) {
+    const base = TRIAL_MODE ? TRIAL_API_BASE : API_BASE;
+    const headers = { "Content-Type": "application/json" };
+    if (!TRIAL_MODE && API_KEY) {
+        headers["X-API-Key"] = API_KEY;
+    }
+    if (TRIAL_MODE) {
+        headers["X-Trial-Session"] = trialSessionId;
+    }
+    const res = await fetch(`${base}${path}`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API ${res.status}: ${text}`);
+    }
+    return res.json();
+}
+function textResult(data) {
+    return {
+        content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    };
+}
+function errorResult(message) {
+    return {
+        isError: true,
+        content: [{ type: "text", text: message }],
+    };
+}
+// --- Input sanitization ---
+function sanitizeString(input, maxLength = 200) {
+    // Strip control characters, limit length, trim whitespace
+    return input
+        .replace(/[\x00-\x1f\x7f]/g, "")
+        .slice(0, maxLength)
+        .trim();
+}
+// --- Trial-aware tool wrapper ---
+function withTrialGuard(handler) {
+    return async (...args) => {
+        const { allowed, remaining } = checkTrialLimit();
+        if (!allowed)
+            return trialExpiredResult();
+        consumeTrialRequest();
+        const result = await handler(...args);
+        // Inject trial info into successful responses
+        if (TRIAL_MODE && result.content && !result.isError) {
+            try {
+                const parsed = JSON.parse(result.content[0].text);
+                const withInfo = appendTrialInfo(parsed, TRIAL_LIMIT - trialRequestCount);
+                return textResult(withInfo);
+            }
+            catch {
+                return result;
+            }
+        }
+        return result;
+    };
+}
+// --- Server ---
+const server = new mcp_js_1.McpServer({
+    name: "rollin",
+    version: VERSION,
+});
+// TOOL 1: Search locations
+server.registerTool("search_locations", {
+    title: "Search Accessible Locations",
+    description: "Search for wheelchair-accessible restaurants, cafes, and bars near a location. " +
+        "Returns scored results with accessibility features. Requires latitude and longitude.",
+    inputSchema: {
+        q: zod_1.z.string().optional().describe("Search by name, cuisine, or category (e.g. 'sushi', 'Italian')"),
+        lat: zod_1.z.number().describe("Latitude of the search center"),
+        lng: zod_1.z.number().describe("Longitude of the search center"),
+        radius: zod_1.z.number().min(0.1).max(25).default(5).optional()
+            .describe("Search radius in miles (default 5, max 25)"),
+        min_score: zod_1.z.number().min(0).max(100).optional()
+            .describe("Minimum accessibility score (0-100)"),
+        features: zod_1.z.string().optional()
+            .describe("Comma-separated feature filter: wheelchair_entry, accessible_restroom, level_entry, parking, elevator, wide_aisles"),
+        limit: zod_1.z.number().min(1).max(50).default(10).optional()
+            .describe("Number of results (default 10, max 50)"),
+        lighting: zod_1.z.enum(["bright", "moderate", "dim"]).optional()
+            .describe("Filter by ambient lighting level: bright, moderate, or dim"),
+    },
+}, withTrialGuard(async (params) => {
+    try {
+        const queryParams = {};
+        if (params.q)
+            queryParams.q = sanitizeString(params.q);
+        queryParams.lat = String(params.lat);
+        queryParams.lng = String(params.lng);
+        if (params.radius)
+            queryParams.radius = String(params.radius);
+        if (params.min_score)
+            queryParams.min_score = String(params.min_score);
+        if (params.features)
+            queryParams.features = sanitizeString(params.features);
+        if (params.limit)
+            queryParams.limit = String(params.limit);
+        if (params.lighting)
+            queryParams.lighting = params.lighting;
+        const data = await apiGet("/locations", queryParams);
+        return textResult(data);
+    }
+    catch (err) {
+        return errorResult(`Failed to search locations: ${err.message}`);
+    }
+}));
+// TOOL 2: Get location details + score breakdown
+server.registerTool("get_location_details", {
+    title: "Get Location Details",
+    description: "Get full accessibility details and score breakdown for a specific location. " +
+        "Returns features, score components, and verification status.",
+    inputSchema: {
+        id: zod_1.z.string().describe("Location ID (from search results)"),
+    },
+}, withTrialGuard(async ({ id }) => {
+    try {
+        const [details, score] = await Promise.all([
+            apiGet(`/locations/${encodeURIComponent(id)}`),
+            apiGet(`/score/${encodeURIComponent(id)}`).catch(() => null),
+        ]);
+        const result = { ...details };
+        if (score) {
+            result.score_breakdown = score;
+        }
+        return textResult(result);
+    }
+    catch (err) {
+        return errorResult(`Failed to get location details: ${err.message}`);
+    }
+}));
+// TOOL 3: List coverage regions
+server.registerTool("list_regions", {
+    title: "List Coverage Regions",
+    description: "List all regions where accessibility data is available. " +
+        "Returns states, regions, and location counts for each area.",
+    inputSchema: {},
+}, withTrialGuard(async () => {
+    try {
+        const data = await apiGet("/regions");
+        return textResult(data);
+    }
+    catch (err) {
+        return errorResult(`Failed to list regions: ${err.message}`);
+    }
+}));
+// TOOL 4: Submit feedback
+server.registerTool("submit_feedback", {
+    title: "Submit Location Feedback",
+    description: "Submit a correction or feedback about a location's accessibility. " +
+        "Use this when a user reports that accessibility information is inaccurate.",
+    inputSchema: {
+        location_id: zod_1.z.string().describe("Location ID to submit feedback for"),
+        feedback_type: zod_1.z.enum(["accurate", "inaccurate", "correction"])
+            .describe("Type: 'accurate' to confirm, 'inaccurate' to flag, 'correction' to update features"),
+        features: zod_1.z.record(zod_1.z.boolean().nullable()).optional()
+            .describe("Feature corrections, e.g. { wheelchair_entry: true, parking: false }"),
+        comment: zod_1.z.string().max(1000).optional()
+            .describe("Additional context (max 1000 characters)"),
+    },
+}, withTrialGuard(async (params) => {
+    try {
+        const data = await apiPost("/feedback", {
+            location_id: sanitizeString(params.location_id, 100),
+            feedback_type: params.feedback_type,
+            features: params.features,
+            comment: params.comment ? sanitizeString(params.comment, 1000) : undefined,
+        });
+        return textResult(data);
+    }
+    catch (err) {
+        return errorResult(`Failed to submit feedback: ${err.message}`);
+    }
+}));
+// TOOL 5: Health check (not trial-gated — always works)
+server.registerTool("check_health", {
+    title: "Check API Health",
+    description: "Check if the ROLLIN API is operational. Also reports trial mode status.",
+    inputSchema: {},
+}, async () => {
+    try {
+        const res = await fetch(`${API_BASE}/health`);
+        const data = await res.json();
+        // Add server info
+        data.mcp_server_version = VERSION;
+        data.trial_mode = TRIAL_MODE;
+        if (TRIAL_MODE) {
+            data.trial_requests_used = trialRequestCount;
+            data.trial_requests_remaining = Math.max(0, TRIAL_LIMIT - trialRequestCount);
+            data.get_api_key = PORTAL_URL;
+        }
+        return textResult(data);
+    }
+    catch (err) {
+        return errorResult(`API health check failed: ${err.message}`);
+    }
+});
+// RESOURCE: API info
+server.resource("api-info", "rollin://api-info", {
+    description: "ROLLIN API overview and available features",
+    mimeType: "text/plain",
+}, async () => ({
+    contents: [
+        {
+            uri: "rollin://api-info",
+            mimeType: "text/plain",
+            text: "ROLLIN Accessibility API\n" +
+                "========================\n\n" +
+                "Wheelchair accessibility data for 105,000+ restaurants, cafes, and bars across 15 US states.\n\n" +
+                "Coverage: NY, CA, MA, FL, IL, CO, TX, OH, ID, NJ, PA, DC, AZ, WA, OR\n" +
+                "Regions: 48 metro areas and regions\n\n" +
+                "Accessibility features tracked:\n" +
+                "- wheelchair_entry: Step-free entrance\n" +
+                "- accessible_restroom: ADA-compliant restroom\n" +
+                "- level_entry: No steps at entrance\n" +
+                "- parking: Accessible parking available\n" +
+                "- elevator: Elevator access between floors\n" +
+                "- wide_aisles: Sufficient space for wheelchair navigation\n\n" +
+                "Scores: 0-100 scale based on proprietary multi-source data pipeline.\n\n" +
+                "Docs: https://joinrollin.com/developers.html\n" +
+                "API Keys: https://joinrollin.com/portal.html\n" +
+                "MCP Server: https://joinrollin.com/mcp\n" +
+                "Status: https://joinrollin.com/status.html\n",
+        },
+    ],
+}));
+// --- Start ---
+async function main() {
+    // Welcome banner
+    if (TRIAL_MODE) {
+        process.stderr.write("\n" +
+            "  ╔══════════════════════════════════════════════════╗\n" +
+            `  ║  ROLLIN MCP Server v${VERSION}                       ║\n` +
+            "  ║  Running in trial mode (5 requests per session)  ║\n" +
+            "  ║                                                  ║\n" +
+            "  ║  Get your free API key for unlimited access:     ║\n" +
+            "  ║  → https://joinrollin.com/portal                 ║\n" +
+            "  ║                                                  ║\n" +
+            "  ║  Then set: ROLLIN_API_KEY=your_key_here          ║\n" +
+            "  ╚══════════════════════════════════════════════════╝\n\n");
+    }
+    else {
+        process.stderr.write(`ROLLIN MCP server v${VERSION} running (authenticated)\n`);
+    }
+    const transport = new stdio_js_1.StdioServerTransport();
+    await server.connect(transport);
+}
+main().catch((err) => {
+    process.stderr.write(`Fatal error: ${err}\n`);
+    process.exit(1);
+});
+//# sourceMappingURL=index.js.map
