@@ -7,7 +7,7 @@
 <h3 align="center">ROLLIN MCP Server</h3>
 
 <p align="center">
-  Wheelchair accessibility data for 88,000+ locations — delivered through the Model Context Protocol.
+  Wheelchair accessibility data for 105,000+ locations across 15 US states — delivered through the Model Context Protocol.
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ---
 
-**The only wheelchair accessibility data source available through MCP.** Search restaurants, cafes, and bars. Get real 0–100 accessibility scores. Submit corrections through natural conversation. One protocol — every platform.
+**The only wheelchair accessibility data source available through MCP.** Search 105,000+ restaurants, cafes, and bars across 15 US states. Get real 0–100 accessibility scores. Submit corrections through natural conversation. One protocol — every platform.
 
 **v1.1.0** — Now includes `lighting` parameter for filtering by ambient lighting level, and `environment` object in response data with lighting details.
 
@@ -130,13 +130,42 @@ Pipe into any MCP-compatible process.
 
 ## Tools
 
-| Tool | What It Does |
-|------|-------------|
-| `search_locations` | Find accessible restaurants near any US location. Filter by cuisine, minimum score, accessibility features, and ambient lighting (`bright`, `moderate`, `dim`). |
-| `get_location_details` | Full accessibility breakdown — score, 6 tracked features, `environment` object (lighting data), verification status, score components. |
-| `list_regions` | All coverage areas with location counts. Great for "where do you cover?" queries. |
-| `submit_feedback` | Submit corrections through conversation. *"That place has a ramp now."* |
-| `check_health` | Verify the API is up before making requests. |
+### `search_locations`
+Search accessible venues by location, query, and accessibility criteria.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `q` | string | no | Search query (name, cuisine, type) |
+| `lat` | number | no | Latitude for location-based search |
+| `lng` | number | no | Longitude for location-based search |
+| `radius` | number | no | Search radius in miles (default: 10) |
+| `min_score` | number | no | Minimum accessibility score 0-100 |
+| `limit` | number | no | Max results (default: 20) |
+| `lighting` | string | no | Filter by lighting: `bright`, `moderate`, `dim` |
+
+### `get_location_details`
+Full accessibility breakdown for a single venue.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | yes | Location ID from search results |
+
+Returns: score (0-100), 6 tracked features (`wheelchair_entry`, `accessible_restroom`, `level_entry`, `parking`, `elevator`, `wide_aisles`), environment/lighting data, verification status, community feedback.
+
+### `list_regions`
+All coverage areas with location counts. No parameters.
+
+### `submit_feedback`
+Submit accessibility corrections through conversation.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `location_id` | string | yes | Location ID |
+| `type` | string | yes | Feedback type |
+| `message` | string | yes | Description of correction |
+
+### `check_health`
+Verify the API is up. No parameters.
 
 ## Example Prompts
 
@@ -149,7 +178,7 @@ Once configured, just ask naturally:
 
 ## Coverage
 
-**13 US states &middot; 45 regions &middot; 88,000+ scored locations**
+**15 US states &middot; 48 regions &middot; 105,000+ scored locations**
 
 | State | Regions |
 |-------|---------|
@@ -165,6 +194,9 @@ Once configured, just ask naturally:
 | New Jersey | Statewide |
 | Pennsylvania | Statewide |
 | Washington DC | DC Metro |
+| Arizona | Phoenix, Tucson |
+| Washington | Seattle Metro |
+| Oregon | Portland Metro |
 
 ## Pricing
 
