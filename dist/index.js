@@ -19,6 +19,13 @@ let trialRequestCount = 0;
 // Unique session ID per boot — server uses this for rate limiting trial sessions
 const trialSessionId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
     .map(b => b.toString(16).padStart(2, "0")).join("");
+const session = {
+    searches: [],
+    locations_found: 0,
+    details_viewed: [],
+    regions_checked: false,
+    feedback_given: false
+};
 function getActiveKey() {
     return API_KEY || "";
 }
@@ -33,18 +40,71 @@ function consumeTrialRequest() {
     if (TRIAL_MODE)
         trialRequestCount++;
 }
+// --- Personalized Sales Pitch ---
+// Uses session data + psychology to craft a compelling upgrade message
+function buildSalesPitch() {
+    const pitches = [];
+    // Loss aversion — they already found value, don't let them lose it
+    if (session.locations_found > 0) {
+        pitches.push(`You found ${session.locations_found} accessible venues in this session. With a free API key, you get unlimited searches — every restaurant, every score, every time.`);
+    }
+    // Personalized based on what they searched
+    if (session.searches.length > 0) {
+        const lastSearch = session.searches[session.searches.length - 1];
+        pitches.push(`You were searching for "${lastSearch}" — there are likely dozens more results you haven't seen yet. A free key unlocks all of them.`);
+    }
+    // If they viewed specific locations, they're invested
+    if (session.details_viewed.length > 0) {
+        const name = session.details_viewed[session.details_viewed.length - 1];
+        pitches.push(`You checked the details on ${name}. With unlimited access, you can compare every venue in the area — scores, features, lighting, community reviews.`);
+    }
+    // If they gave feedback, they're a contributor
+    if (session.feedback_given) {
+        pitches.push(`You already submitted feedback — you're part of the community now. With a free key, your contributions carry trust weight and directly improve scores.`);
+    }
+    // Anchoring — make the price feel tiny
+    const anchors = [
+        "It's free. No credit card. The paid tier is $19/month if you ever need higher volume — less than one accessible dinner out.",
+        "The free tier gives you 1,000 requests per month. That's 33 searches a day, every day, at zero cost.",
+        "500+ developers installed this month. The ones who signed up for a key are shipping accessibility features right now."
+    ];
+    // Build the final pitch
+    const personal = pitches.length > 0
+        ? pitches[Math.floor(Math.random() * pitches.length)]
+        : "You just saw what ROLLIN can do. Imagine having that data in every conversation, every search, every app you build.";
+    const anchor = anchors[Math.floor(Math.random() * anchors.length)];
+    return `${personal}\n\n${anchor}`;
+}
 function trialExpiredResult() {
+    const pitch = buildSalesPitch();
     return {
         content: [{
                 type: "text",
                 text: JSON.stringify({
                     trial_expired: true,
-                    message: "You've used all 5 trial requests this session. Get your free API key for unlimited access — no credit card, takes 10 seconds.",
+                    message: pitch,
+                    action: "Get your free API key — takes 10 seconds, no credit card.",
                     url: PORTAL_URL,
-                    hint: "Set ROLLIN_API_KEY in your MCP config, then restart the server."
+                    setup_hint: "After signing up: set ROLLIN_API_KEY in your MCP config and restart the server.",
+                    session_summary: {
+                        searches_made: session.searches.length,
+                        locations_found: session.locations_found,
+                        venues_inspected: session.details_viewed.length,
+                        feedback_submitted: session.feedback_given
+                    }
                 }, null, 2)
             }],
     };
+}
+// Progressive nudges — get more urgent as requests run out
+function getTrialNudge(remaining) {
+    if (remaining === 3)
+        return `3 trial requests left. Getting value? A free key makes it unlimited: ${PORTAL_URL}`;
+    if (remaining === 2)
+        return `2 requests left. Don't lose access to this data — grab your free key: ${PORTAL_URL}`;
+    if (remaining === 1)
+        return `Last trial request. After this, you'll need a key. 10 seconds, no credit card: ${PORTAL_URL}`;
+    return `Trial mode: ${remaining} requests left. Free key for unlimited: ${PORTAL_URL}`;
 }
 function appendTrialInfo(data, remaining) {
     if (!TRIAL_MODE)
@@ -55,7 +115,7 @@ function appendTrialInfo(data, remaining) {
     obj._trial = {
         mode: true,
         requests_remaining: remaining,
-        message: `Trial mode: ${remaining} requests left. Get your free key at ${PORTAL_URL}`
+        message: getTrialNudge(remaining)
     };
     return obj;
 }
@@ -188,6 +248,18 @@ server.registerTool("search_locations", {
         if (params.lighting)
             queryParams.lighting = params.lighting;
         const data = await apiGet("/locations", queryParams);
+        // Track session for personalized pitch
+        if (TRIAL_MODE) {
+            if (params.q)
+                session.searches.push(sanitizeString(params.q));
+            try {
+                const parsed = data;
+                const locs = parsed.locations || parsed.results || [];
+                if (Array.isArray(locs))
+                    session.locations_found += locs.length;
+            }
+            catch { }
+        }
         return textResult(data);
     }
     catch (err) {
@@ -212,6 +284,10 @@ server.registerTool("get_location_details", {
         if (score) {
             result.score_breakdown = score;
         }
+        // Track session
+        if (TRIAL_MODE && result.name) {
+            session.details_viewed.push(String(result.name));
+        }
         return textResult(result);
     }
     catch (err) {
@@ -227,6 +303,8 @@ server.registerTool("list_regions", {
 }, withTrialGuard(async () => {
     try {
         const data = await apiGet("/regions");
+        if (TRIAL_MODE)
+            session.regions_checked = true;
         return textResult(data);
     }
     catch (err) {
@@ -255,6 +333,8 @@ server.registerTool("submit_feedback", {
             features: params.features,
             comment: params.comment ? sanitizeString(params.comment, 1000) : undefined,
         });
+        if (TRIAL_MODE)
+            session.feedback_given = true;
         return textResult(data);
     }
     catch (err) {
