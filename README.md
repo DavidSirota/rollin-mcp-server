@@ -22,7 +22,7 @@
 
 **The only wheelchair accessibility data source available through MCP.** Search 105,000+ restaurants, cafes, and bars across 15 US states. Get real 0–100 accessibility scores. Submit corrections through natural conversation. One protocol — every platform.
 
-**v1.2.0** — **Trial mode.** No API key? No problem. The server now boots and works immediately with 5 free requests per session. See real data before signing up.
+**v1.3.0** — **Trial mode + smart onboarding.** No API key? No problem. The server boots and works immediately with 5 free requests per session. Real data, real scores. Progressive nudges guide you to a free key when you're ready. Session-aware — the more you use it, the more personalized the experience.
 
 > Nobody should have to call ahead to ask if they can get in the door.
 > ROLLIN puts accessibility data where it actually gets used.
