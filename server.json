@@ -1,17 +1,17 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.DavidSirota/rollin-mcp-server",
-  "description": "Wheelchair accessibility scores for 70,000+ US restaurants. Search, filter, and submit feedback.",
+  "description": "Wheelchair accessibility scores for 98,000+ US restaurants, bars, and cafes. Search, filter, and submit feedback.",
   "repository": {
     "url": "https://github.com/DavidSirota/rollin-mcp-server",
     "source": "github"
   },
-  "version": "1.0.1",
+  "version": "1.3.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "rollin-mcp-server",
-      "version": "1.0.1",
+      "version": "1.3.2",
       "transport": {
         "type": "stdio"
       },

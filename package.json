@@ -1,7 +1,7 @@
 {
   "name": "rollin-mcp-server",
-  "version": "1.3.0",
-  "description": "MCP server for the ROLLIN Accessibility API — wheelchair accessibility data for 105,000+ US locations across 15 states",
+  "version": "1.3.2",
+  "description": "MCP server for the ROLLIN Accessibility API — wheelchair accessibility data for 98,000+ US locations across 16 states",
   "main": "dist/index.js",
   "bin": {
     "rollin-mcp-server": "dist/index.js"
@@ -30,7 +30,7 @@
     "chatbot",
     "open-protocol"
   ],
-  "author": "JoinRollin Inc <projects@stacklinestudio.com>",
+  "author": "JoinRollin Inc <operations@joinrollin.com>",
   "license": "MIT",
   "mcpName": "io.github.DavidSirota/rollin-mcp-server",
   "homepage": "https://joinrollin.com/developers.html",

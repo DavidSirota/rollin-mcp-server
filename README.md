@@ -7,7 +7,7 @@
 <h3 align="center">ROLLIN MCP Server</h3>
 
 <p align="center">
-  Wheelchair accessibility data for 105,000+ locations across 15 US states — delivered through the Model Context Protocol.
+  Wheelchair accessibility data for 98,000+ locations across 15 US states — delivered through the Model Context Protocol.
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ---
 
-**The only wheelchair accessibility data source available through MCP.** Search 105,000+ restaurants, cafes, and bars across 15 US states. Get real 0–100 accessibility scores. Submit corrections through natural conversation. One protocol — every platform.
+**The only wheelchair accessibility data source available through MCP.** Search 98,000+ restaurants, cafes, and bars across 15 US states. Get real 0–100 accessibility scores. Submit corrections through natural conversation. One protocol — every platform.
 
 **v1.3.0** — **Trial mode + smart onboarding.** No API key? No problem. The server boots and works immediately with 5 free requests per session. Real data, real scores. Progressive nudges guide you to a free key when you're ready. Session-aware — the more you use it, the more personalized the experience.
 
@@ -186,7 +186,7 @@ Once configured, just ask naturally:
 
 ## Coverage
 
-**15 US states &middot; 48 regions &middot; 105,000+ scored locations**
+**15 US states &middot; 77 regions &middot; 98,000+ scored locations**
 
 | State | Regions |
 |-------|---------|
@@ -222,6 +222,7 @@ The MCP server uses your ROLLIN API key. Same tiers, same limits.
 | | |
 |---|---|
 | MCP Server Page | [joinrollin.com/mcp](https://joinrollin.com/mcp) |
+| API Reference (Interactive) | [joinrollin.com/api-docs](https://joinrollin.com/api-docs) |
 | API Documentation | [joinrollin.com/developers](https://joinrollin.com/developers.html) |
 | Developer Portal | [joinrollin.com/portal](https://joinrollin.com/portal.html) |
 | API Status | [joinrollin.com/status](https://joinrollin.com/status.html) |

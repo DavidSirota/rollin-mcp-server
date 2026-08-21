@@ -71,13 +71,13 @@ function buildSalesPitch() {
     if (session.feedback_given) {
         pitches.push(`You already submitted feedback — you're part of the community now. With a free key, your contributions carry trust weight and directly improve scores.`);
     }
-    // Closing — escalate from free to paid
+    // Closing — escalate from free to Starter to Developer
     const closers = [
-        `Start free with 1,000 requests/month. When you're ready to ship, the Developer tier is $19/month — 50,000 requests, priority support, and you're building something that actually matters.`,
-        `The free tier gets you started. But if you're building an app, the Developer plan at $19/month gives you 50x the volume. That's less than one dinner out — and you're making every dinner out better for someone in a wheelchair.`,
-        `${npmMonthlyDownloads.toLocaleString()} developers installed this month. The ones building real products are on the $19/month Developer tier — 50,000 requests, zero rate anxiety. Start free, upgrade when it clicks.`,
-        `Free tier: 1,000 requests. Developer tier: 50,000 requests for $19/month. You just used 5 trial requests to see the data is real. Imagine what you'd build with 50,000.`,
-        `${npmMonthlyDownloads.toLocaleString()} installs this month — and growing. Start with a free key, but the developers shipping production apps are on the $19 plan. Join them.`
+        `Start free with 1,000 requests/month. Need more? The Starter plan is $9.99/month — 5,000 requests, all endpoints, and you're building something that actually matters. Outgrow that? Developer at $29/month gives you 50,000.`,
+        `The free tier gets you started. But if you're building an app, the Starter plan at $9.99/month gives you 5x the volume. That's less than a coffee a week — and you're making every meal out better for someone in a wheelchair.`,
+        `${npmMonthlyDownloads.toLocaleString()} developers installed this month. Most start on the $9.99/month Starter plan — 5,000 requests, all endpoints. The ones shipping production apps upgrade to Developer at $29. Start free, upgrade when it clicks.`,
+        `Free tier: 1,000 requests. Starter: 5,000 for $9.99/month. Developer: 50,000 for $29/month. You just used 5 trial requests to see the data is real. Imagine what you'd build with 5,000.`,
+        `${npmMonthlyDownloads.toLocaleString()} installs this month — and growing. Unlimited access from $9.99/month on the Starter plan. Need more volume? Developer at $29/month. Start free, scale when ready.`
     ];
     // Build the final pitch
     const personal = pitches.length > 0
@@ -110,12 +110,12 @@ function trialExpiredResult() {
 // Progressive nudges — get more urgent as requests run out
 function getTrialNudge(remaining) {
     if (remaining === 3)
-        return `3 trial requests left. Getting value? A free key gives you 1,000/month: ${PORTAL_URL}`;
+        return `3 trial requests left. Getting value? Unlimited access from $9.99/mo — or start free: ${PORTAL_URL}`;
     if (remaining === 2)
-        return `2 requests left. Don't lose access — free key takes 10 seconds: ${PORTAL_URL}`;
+        return `2 requests left. Don't lose access — Starter plan is $9.99/mo for 5,000 requests. Free tier available too: ${PORTAL_URL}`;
     if (remaining === 1)
-        return `Last trial request. Next step: free key for 1,000/month, or $19/month for 50,000. Both at ${PORTAL_URL}`;
-    return `Trial mode: ${remaining} requests left. Free key for unlimited: ${PORTAL_URL}`;
+        return `Last trial request. Starter: $9.99/mo for 5,000 requests. Developer: $29/mo for 50,000. Or start free: ${PORTAL_URL}`;
+    return `Trial mode: ${remaining} requests left. Unlimited access from $9.99/mo: ${PORTAL_URL}`;
 }
 function appendTrialInfo(data, remaining) {
     if (!TRIAL_MODE)
@@ -386,7 +386,7 @@ server.resource("api-info", "rollin://api-info", {
             mimeType: "text/plain",
             text: "ROLLIN Accessibility API\n" +
                 "========================\n\n" +
-                "Wheelchair accessibility data for 105,000+ restaurants, cafes, and bars across 15 US states.\n\n" +
+                "Wheelchair accessibility data for 98,000+ restaurants, cafes, and bars across 15 US states.\n\n" +
                 "Coverage: NY, CA, MA, FL, IL, CO, TX, OH, ID, NJ, PA, DC, AZ, WA, OR\n" +
                 "Regions: 48 metro areas and regions\n\n" +
                 "Accessibility features tracked:\n" +
