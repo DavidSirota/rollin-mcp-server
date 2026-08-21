@@ -7,6 +7,20 @@
     "source": "github"
   },
   "version": "1.3.2",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://joinrollin.com/api/mcp",
+      "headers": [
+        {
+          "name": "X-Api-Key",
+          "description": "Your ROLLIN API key. Get one free at https://joinrollin.com/portal.html",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
   "packages": [
     {
       "registryType": "npm",

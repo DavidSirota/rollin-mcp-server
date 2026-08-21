@@ -45,6 +45,21 @@ Build one MCP server → every compatible client gets instant access. Think of i
 
 ## Quick Start
 
+### Option A: Hosted server (no install)
+
+ROLLIN also runs a hosted MCP server over Streamable HTTP — nothing to run locally, always current:
+
+```bash
+claude mcp add --transport http rollin https://joinrollin.com/api/mcp \
+  --header "X-Api-Key: your_api_key_here"
+```
+
+Works in any client that supports remote MCP servers. Send your key as an
+`Authorization: Bearer` or `X-Api-Key` header. Any tier works, including Free.
+Discovery (initialize, tools/list) needs no key; tool calls require one.
+
+### Option B: Run locally via npx
+
 ### 1. Add the Server
 
 ```bash
@@ -198,22 +213,22 @@ Once configured, just ask naturally:
 | Colorado | Northeast CO, Northwest CO, Southeast CO, Southwest CO |
 | Texas | DFW, Houston, Austin, San Antonio, El Paso |
 | Ohio | Cleveland, Cincinnati, Columbus, Northwest OH |
+| Georgia | Atlanta Metro, North Atlanta, Savannah, Augusta, Columbus, Macon, Athens, Albany |
+| North Carolina | Charlotte Metro, Raleigh, Durham, Greensboro, Winston-Salem, Asheville, Wilmington, Fayetteville |
+| South Carolina | Charleston, Columbia, Greenville, Myrtle Beach, Spartanburg, Hilton Head, Rock Hill, Florence |
 | Idaho | Northern ID, Boise Metro |
 | New Jersey | Statewide |
 | Pennsylvania | Statewide |
 | Washington DC | DC Metro |
-| Arizona | Phoenix, Tucson |
-| Washington | Seattle Metro |
-| Oregon | Portland Metro |
 
 ## Pricing
 
 The MCP server uses your ROLLIN API key. Same tiers, same limits.
 
-| | Free | Developer | Business |
-|---|---|---|---|
-| **Requests** | 1,000/mo | 50,000/mo | 500,000/mo |
-| **Price** | $0 | $29/mo | $149/mo |
+| | Free | Starter | Developer | Business |
+|---|---|---|---|---|
+| **Requests** | 1,000/mo | 5,000/mo | 50,000/mo | 500,000/mo |
+| **Price** | $0 | $9.99/mo | $29/mo | $149/mo |
 
 **[Get your free key →](https://joinrollin.com/portal.html)**
 
