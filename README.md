@@ -7,7 +7,7 @@
 <h3 align="center">ROLLIN MCP Server</h3>
 
 <p align="center">
-  Wheelchair accessibility data for 98,000+ locations across 15 US states — delivered through the Model Context Protocol.
+  Wheelchair accessibility data for 98,000+ US locations, delivered through the Model Context Protocol.
 </p>
 
 <p align="center">
@@ -20,9 +20,9 @@
 
 ---
 
-**The only wheelchair accessibility data source available through MCP.** Search 98,000+ restaurants, cafes, and bars across 15 US states. Get real 0–100 accessibility scores. Submit corrections through natural conversation. One protocol — every platform.
+**The only wheelchair accessibility data source available through MCP.** Search 98,000+ restaurants, cafes, and bars across the US. Get real 0-100 accessibility scores. Submit corrections through natural conversation. One protocol, every platform.
 
-**v1.3.0** — **Trial mode + smart onboarding.** No API key? No problem. The server boots and works immediately with 5 free requests per session. Real data, real scores. Progressive nudges guide you to a free key when you're ready. Session-aware — the more you use it, the more personalized the experience.
+**v1.4** — **Hosted server.** Connect over Streamable HTTP at `https://joinrollin.com/api/mcp` with nothing to install, or run locally via npx. Trial mode still ships with the package: 5 free requests per session, no API key needed, with progressive nudges to a free key when you're ready.
 
 > Nobody should have to call ahead to ask if they can get in the door.
 > ROLLIN puts accessibility data where it actually gets used.
@@ -75,7 +75,7 @@ Sign up at **[joinrollin.com/portal](https://joinrollin.com/portal.html)** — n
 ### 3. Configure Your Client
 
 <details>
-<summary><strong>Desktop App</strong> (JSON config)</summary>
+<summary><img src="assets/claude.svg" height="16" valign="middle"> <strong>Claude Desktop</strong> (JSON config)</summary>
 
 Add to your MCP client's configuration file:
 
@@ -98,7 +98,7 @@ Works with any desktop MCP client.
 </details>
 
 <details>
-<summary><strong>Cursor</strong></summary>
+<summary><img src="assets/cursor.svg" height="16" valign="middle"> <strong>Cursor</strong></summary>
 
 Add to `.cursor/mcp.json` in your workspace:
 
@@ -119,7 +119,7 @@ Add to `.cursor/mcp.json` in your workspace:
 </details>
 
 <details>
-<summary><strong>VS Code</strong></summary>
+<summary><img src="assets/vscode.svg" height="16" valign="middle"> <strong>VS Code</strong></summary>
 
 Add to `.vscode/mcp.json` in your workspace:
 
@@ -140,7 +140,7 @@ Add to `.vscode/mcp.json` in your workspace:
 </details>
 
 <details>
-<summary><strong>CLI / Headless</strong></summary>
+<summary><img src="assets/terminal.svg" height="16" valign="middle"> <strong>CLI / Headless</strong></summary>
 
 ```bash
 export ROLLIN_API_KEY="your_api_key_here"
@@ -201,7 +201,7 @@ Once configured, just ask naturally:
 
 ## Coverage
 
-**15 US states &middot; 77 regions &middot; 98,000+ scored locations**
+**98,000+ scored locations coast to coast**
 
 | State | Regions |
 |-------|---------|
@@ -246,4 +246,4 @@ The MCP server uses your ROLLIN API key. Same tiers, same limits.
 
 ## License
 
-MIT — [Stackline Studio](https://stacklinestudio.com)
+MIT — [JoinRollin Inc](https://joinrollin.com)

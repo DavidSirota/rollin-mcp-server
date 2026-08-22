@@ -300,7 +300,9 @@ server.registerTool(
   withTrialGuard(async (params: any) => {
     try {
       const queryParams: Record<string, string> = {};
-      if (params.q) queryParams.q = sanitizeString(params.q);
+      // v1 API has no `q` param — map to cuisine (partial match) so the
+      // filter actually applies instead of being silently ignored.
+      if (params.q) queryParams.cuisine = sanitizeString(params.q);
       queryParams.lat = String(params.lat);
       queryParams.lng = String(params.lng);
       if (params.radius) queryParams.radius = String(params.radius);

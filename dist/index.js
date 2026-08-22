@@ -244,8 +244,10 @@ server.registerTool("search_locations", {
 }, withTrialGuard(async (params) => {
     try {
         const queryParams = {};
+        // v1 API has no `q` param — map to cuisine (partial match) so the
+        // filter actually applies instead of being silently ignored.
         if (params.q)
-            queryParams.q = sanitizeString(params.q);
+            queryParams.cuisine = sanitizeString(params.q);
         queryParams.lat = String(params.lat);
         queryParams.lng = String(params.lng);
         if (params.radius)
@@ -386,7 +388,7 @@ server.resource("api-info", "rollin://api-info", {
             mimeType: "text/plain",
             text: "ROLLIN Accessibility API\n" +
                 "========================\n\n" +
-                "Wheelchair accessibility data for 98,000+ restaurants, cafes, and bars across 15 US states.\n\n" +
+                "Wheelchair accessibility data for 105,000+ restaurants, cafes, and bars across 15 US states.\n\n" +
                 "Coverage: NY, CA, MA, FL, IL, CO, TX, OH, ID, NJ, PA, DC, AZ, WA, OR\n" +
                 "Regions: 48 metro areas and regions\n\n" +
                 "Accessibility features tracked:\n" +
